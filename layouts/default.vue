@@ -1,11 +1,11 @@
 <!-- layouts/default.vue -->
 <template>
   <div class="app-layout">
-    <!-- <AppHeader /> -->
+    <AppHeader />
     <main class="main-content">
       <slot />
     </main>
-    <!-- <AppFooter /> -->
+    <AppFooter />
   </div>
 </template>
 

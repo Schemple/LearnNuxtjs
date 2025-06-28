@@ -11,7 +11,7 @@ export const useBuildingStore = () => {
   const error = ref(null)
 
   const initializeData = () => {
-    if (process.client) {
+    if (import.meta.client) {
       try {
         const saved = localStorage.getItem('buildings')
         if (saved) {
@@ -28,7 +28,7 @@ export const useBuildingStore = () => {
   }
 
   const saveBuildings = () => {
-    if (process.client) {
+    if (import.meta.client) {
       try {
         localStorage.setItem('buildings', JSON.stringify(buildings.value))
       } catch (err) {
@@ -96,6 +96,7 @@ export const useBuildingStore = () => {
   const updateBuilding = async (updatedBuilding) => {
     loading.value = true
     error.value = null
+    // throw Error("test");
     try {
       const index = buildings.value.findIndex(b => b.id === updatedBuilding.id)
       if (index === -1) {

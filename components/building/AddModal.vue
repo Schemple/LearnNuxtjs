@@ -16,8 +16,7 @@ const props = defineProps({
         required: true
     }
 })
-
-// Data
+const alert = useAlert();
 const buildingStore = useBuildingStore();
 let buildingModal = null;
 const currentBuilding = ref({
@@ -32,15 +31,22 @@ const currentBuilding = ref({
 
 const errors = ref({});
 
-const saveBuilding = () => {
+const saveBuilding = async () => {
     if (!validateForm()) return;
-    
-    if (props.isEditing) {
-        buildingStore.updateBuilding(currentBuilding.value)
-    } else {
-        buildingStore.addBuilding(currentBuilding.value);
+    try {
+        if (props.isEditing) {
+            await buildingStore.updateBuilding(currentBuilding.value)
+            alert.showSuccessAlert("Chỉnh sửa thông tin tòa nhà thành công")
+        } else {
+            await buildingStore.addBuilding(currentBuilding.value);
+            alert.showSuccessAlert("Thêm mới tòa nhà thành công")
+        }
+    } catch (err) {
+        if (props.isEditing) alert.showErrorAlert("Có lỗi xảy ra khi sửa thông tin tòa nhà")
+        else alert.showErrorAlert("Có lỗi xảy ra khi thêm thông tin tòa nhà");
+    } finally {
+        emit('close');
     }
-    emit('close');
 };
 
 const validateForm = () => {

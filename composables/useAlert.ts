@@ -2,13 +2,12 @@
 export const useAlert = () => {
   const { $swal } = useNuxtApp()
 
-  // Thông báo thành công
-  const showSuccessAlert = (message, title = 'Thành công!') => {
+  const showSuccessAlert = (message, title = 'Thành công!', timer = 2000) => {
     return $swal.fire({
       icon: 'success',
       title: title,
       text: message,
-      timer: 2000,
+      timer: timer,
       showConfirmButton: false,
       toast: true,
       position: 'top-end',
@@ -16,40 +15,42 @@ export const useAlert = () => {
     })
   }
 
-  // Thông báo lỗi
   const showErrorAlert = (message, title = 'Lỗi!') => {
     return $swal.fire({
       icon: 'error',
       title: title,
       text: message,
+      toast: true,
+      position: 'top-end',
       confirmButtonText: 'Đóng',
       confirmButtonColor: '#dc3545'
     })
   }
 
-  // Thông báo cảnh báo
   const showWarningAlert = (message, title = 'Cảnh báo!') => {
     return $swal.fire({
       icon: 'warning',
       title: title,
       text: message,
+      toast: true,
+      position: 'top-end',
       confirmButtonText: 'Đóng',
       confirmButtonColor: '#ffc107'
     })
   }
 
-  // Thông báo thông tin
   const showInfoAlert = (message, title = 'Thông tin') => {
     return $swal.fire({
       icon: 'info',
       title: title,
       text: message,
+      toast: true,
+      position: 'top-end',
       confirmButtonText: 'Đóng',
       confirmButtonColor: '#0dcaf0'
     })
   }
 
-  // Xác nhận hành động
   const confirmAction = (
     message, 
     title = 'Xác nhận', 
@@ -70,7 +71,6 @@ export const useAlert = () => {
     })
   }
 
-  // Xác nhận xóa
   const confirmDelete = (itemName, message = null) => {
     const text = message || `Bạn có chắc chắn muốn xóa "${itemName}"? Hành động này không thể hoàn tác.`
     
@@ -88,7 +88,6 @@ export const useAlert = () => {
     })
   }
 
-  // Loading alert
   const showLoadingAlert = (message = 'Đang xử lý...') => {
     return $swal.fire({
       title: message,
@@ -101,12 +100,10 @@ export const useAlert = () => {
     })
   }
 
-  // Đóng alert
   const closeAlert = () => {
     $swal.close()
   }
 
-  // Alert với input
   const showInputAlert = (title, inputPlaceholder, inputValue = '') => {
     return $swal.fire({
       title: title,

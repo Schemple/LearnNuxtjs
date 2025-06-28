@@ -1,6 +1,9 @@
 <!-- components/Layout/AppHeader.vue -->
+<script setup>
+</script>
+
 <template>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark bg-black mb-4">
     <div class="container">
         <a class="navbar-brand" href="#">
             <i class="fas fa-building me-2"></i>
@@ -10,22 +13,19 @@
 </nav>
 </template>
 
-<script setup>
-</script>
-
-<style scoped>
+<style lang="scss" scoped>
 .header-actions {
-margin-top: 1rem;
+    margin-top: 1rem;
 }
 
 @media (max-width: 768px) {
-.header-actions {
-    margin-top: 1rem;
-    text-align: center !important;
-}
+    .header-actions {
+        margin-top: 1rem;
+        text-align: center !important;
+    }
 
-.btn {
-    margin: 0.25rem;
-}
+    .btn {
+        margin: 0.25rem;
+    }
 }
 </style>

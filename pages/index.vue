@@ -79,7 +79,7 @@
     <BuildingTable 
     :filteredBuildings="filteredBuildings" 
     @edit="openEditModal"
-    @delete="openDeleteModal"
+    @delete="deleteBuilding"
     />
 </div>
 
@@ -89,18 +89,13 @@
   :isEditing="isEditing"
   @close="closeModal"
 />
-
-<BuildingDeleteModal
-  :visible="deleteModalVisible"
-  :currentBuilding="currentBuilding"
-  @close="closeModal"
-/>
 </template>
 
 <script setup lang="ts">
   // Reactive data
+  const alert = useAlert();
   const buildingStore = useBuildingStore();
-  const buildings = buildingStore.buildings; // Bỏ computed() vì buildings đã là reactive
+  const buildings = buildingStore.buildings;
   const searchQuery = ref('');
   const currentBuilding = ref({
       id: null,
@@ -116,7 +111,6 @@
 
   // Modal instances
   let buildingModalVisible = ref(false);
-  let deleteModalVisible = ref(false);
 
   // Computed
   const filteredBuildings = computed(() => {
@@ -153,9 +147,17 @@
     buildingModalVisible.value = true;
   };
 
-  const openDeleteModal = (building) => {
-    currentBuilding.value = { ...building };
-    deleteModalVisible.value = true;
+  const deleteBuilding = async (building) => {
+    const result = await alert.confirmDelete(building.name);
+    if (result.isConfirmed) {
+      try {
+        await buildingStore.deleteBuilding(building.id);
+        alert.showSuccessAlert(`Xóa tòa nhà ${building.name} thành công`)
+      } catch (err) {
+        const message = err.messag || "Có lỗi xảy ra khi xóa tòa nhà"
+        alert.showErrorAlert(message);
+      }
+    }
   }
   
   const closeModal = () => {
@@ -168,7 +170,6 @@
       cccd: '',
       cccdDate: ''
     };
-    deleteModalVisible.value = false;
     buildingModalVisible.value = false;
   };
 
@@ -188,7 +189,7 @@
     border: 1px solid rgba(0, 0, 0, 0.125);
   }
   
-  .table  {
+  .table {
     th {
       border-top: none;
       font-weight: 600;
