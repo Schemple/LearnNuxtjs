@@ -79,45 +79,22 @@
     <BuildingTable 
     :filteredBuildings="filteredBuildings" 
     @edit="openEditModal"
-    @delete="confirmDelete"
+    @delete="openDeleteModal"
     />
 </div>
 
-<BuildingModal
+<BuildingAddModal
   :visible="buildingModalVisible"
   :currentBuilding="currentBuilding"
   :isEditing="isEditing"
   @close="closeModal"
 />
 
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">
-          <i class="fas fa-exclamation-triangle me-2"></i>
-          Xác nhận xóa
-        </h5>
-        <button type="button" class="btn-close btn-close-white" @click="closeDeleteModal"></button>
-      </div>
-      <div class="modal-body">
-        <p>Bạn có chắc chắn muốn xóa tòa nhà <strong>{{ buildingToDelete?.name }}</strong>?</p>
-        <p class="text-muted">Hành động này không thể hoàn tác.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" @click="closeDeleteModal">
-            <i class="fas fa-times me-1"></i>
-            Hủy
-        </button>
-        <button type="button" class="btn btn-danger" @click="deleteBuilding">
-            <i class="fas fa-trash me-1"></i>
-            Xóa
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+<BuildingDeleteModal
+  :visible="deleteModalVisible"
+  :currentBuilding="currentBuilding"
+  @close="closeModal"
+/>
 </template>
 
 <script setup lang="ts">
@@ -139,7 +116,7 @@
 
   // Modal instances
   let buildingModalVisible = ref(false);
-  let deleteModal = null;
+  let deleteModalVisible = ref(false);
 
   // Computed
   const filteredBuildings = computed(() => {
@@ -155,18 +132,33 @@
       );
   });
 
-  // Utility methods
-  const getCurrentDate = () => {
-    return new Date().toLocaleDateString('vi-VN');
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('vi-VN');
-  };
-
   // Methods
   const openAddModal = () => {
+    // currentBuilding.value = {
+    //   id: null,
+    //   name: '',
+    //   address: '',
+    //   representative: '',
+    //   phone: '',
+    //   cccd: '',
+    //   cccdDate: ''
+    // };
+    isEditing.value = false;
+    buildingModalVisible.value = true;
+  };
+
+  const openEditModal = (building) => {
+    currentBuilding.value = { ...building };
+    isEditing.value = true;
+    buildingModalVisible.value = true;
+  };
+
+  const openDeleteModal = (building) => {
+    currentBuilding.value = { ...building };
+    deleteModalVisible.value = true;
+  }
+  
+  const closeModal = () => {
     currentBuilding.value = {
       id: null,
       name: '',
@@ -176,47 +168,14 @@
       cccd: '',
       cccdDate: ''
     };
-    isEditing.value = false;
-    buildingModalVisible.value = true;
-  };
-
-  const openEditModal = (building) => {
-      currentBuilding.value = { ...building };
-      isEditing.value = true;
-      buildingModalVisible.value = true;
-  };
-  
-  const closeModal = () => {
+    deleteModalVisible.value = false;
     buildingModalVisible.value = false;
   };
 
-  const confirmDelete = (building) => {
-      buildingToDelete.value = building;
-      deleteModal.show();
-  };
-
-  const deleteBuilding = async () => {
-      if (buildingToDelete.value) {
-          await buildingStore.deleteBuilding(buildingToDelete.value.id);
-          closeDeleteModal();
-      }
-  };
-
-  const closeDeleteModal = () => {
-      deleteModal.hide();
-      buildingToDelete.value = null;
-  };
-
   const handleSearch = () => {
-      // Search is handled by computed property
+    //
   };
 
-  // Lifecycle
-  onMounted(() => {
-    import('bootstrap').then((bootstrap) => {
-      deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    })
-  });
 </script>
 
 <style lang="scss" scoped>

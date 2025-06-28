@@ -1,5 +1,123 @@
+<!-- SCRIPT -->
+<script setup>
+import { ref, onMounted } from 'vue'
+const emit = defineEmits(['close']);
+const props = defineProps({
+    visible: {
+        type: Boolean,
+        required: true
+    },
+    currentBuilding: {
+        type: Object,
+        required: true
+    },
+    isEditing: {
+        type: Boolean,
+        required: true
+    }
+})
+
+// Data
+const buildingStore = useBuildingStore();
+let buildingModal = null;
+const currentBuilding = ref({
+    id: null,
+    name: '',
+    address: '',
+    representative: '',
+    phone: '',
+    cccd: '',
+    cccdDate: ''
+});
+
+const errors = ref({});
+
+const saveBuilding = () => {
+    if (!validateForm()) return;
+    
+    if (props.isEditing) {
+        buildingStore.updateBuilding(currentBuilding.value)
+    } else {
+        buildingStore.addBuilding(currentBuilding.value);
+    }
+    emit('close');
+};
+
+const validateForm = () => {
+    errors.value = {};
+
+    if (!currentBuilding.value.name.trim()) {
+        errors.value.name = 'Tên tòa nhà không được để trống';
+    }
+
+    if (!currentBuilding.value.address.trim()) {
+        errors.value.address = 'Địa chỉ không được để trống';
+    }
+
+    if (!currentBuilding.value.representative.trim()) {
+        errors.value.representative = 'Tên người đại diện không được để trống';
+    }
+
+    if (!currentBuilding.value.phone.trim()) {
+        errors.value.phone = 'Số điện thoại không được để trống';
+    } else if (!/^(0[3|5|7|8|9])+([0-9]{8})$/.test(currentBuilding.value.phone)) {
+        errors.value.phone = 'Số điện thoại không hợp lệ';
+    }
+
+    if (!currentBuilding.value.cccd.trim()) {
+        errors.value.cccd = 'Số CCCD không được để trống';
+    } else if (!/^\d{12}$/.test(currentBuilding.value.cccd)) {
+        errors.value.cccd = 'Số CCCD phải có 12 chữ số';
+    }
+
+    if (!currentBuilding.value.cccdDate) {
+        errors.value.cccdDate = 'Ngày cấp CCCD không được để trống';
+    } else if (new Date(currentBuilding.value.cccdDate) > new Date()) {
+        errors.value.cccdDate = 'Ngày cấp CCCD không được lớn hơn ngày hiện tại';
+    }
+
+    return Object.keys(errors.value).length === 0;
+};
+
+
+watch(() => props.visible, (newVisible) => {
+    if (newVisible) {
+        currentBuilding.value = {...props.currentBuilding};
+        buildingModal.show();
+    } else {
+        buildingModal.hide();
+    }
+})
+
+onMounted(() => {
+    if (process.client) {
+        import('bootstrap').then((bootstrap) => {
+            const modalElement = document.getElementById('buildingModal');
+            buildingModal = new bootstrap.Modal(modalElement);
+            
+            modalElement.addEventListener('shown.bs.modal', () => {
+                // Set focus to the first input or button inside the modal
+                modalElement.querySelector('input, button').focus();
+            });
+        });
+    }
+    document.getElementById('buildingModal').addEventListener('hidden.bs.modal', () => {
+        currentBuilding.value = {
+            id: null,
+            name: '',
+            address: '',
+            representative: '',
+            phone: '',
+            cccd: '',
+            cccdDate: ''
+        };
+        errors.value = {}; 
+        emit('close');
+    });
+})
+</script>
+<!-- HTML -->
 <template>
-<!-- Add/Edit Modal -->
 <div class="modal fade" id="buildingModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -150,127 +268,8 @@
 </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
-const emit = defineEmits(['close']);
-const props = defineProps({
-    visible: {
-        type: Boolean,
-        required: true
-    },
-    currentBuilding: {
-        type: Object,
-        required: true
-    },
-    isEditing: {
-        type: Boolean,
-        required: true
-    }
-})
-
-// Data
-const buildingStore = useBuildingStore();
-let buildingModal = null;
-const currentBuilding = ref({
-    id: null,
-    name: '',
-    address: '',
-    representative: '',
-    phone: '',
-    cccd: '',
-    cccdDate: ''
-});
-const errors = ref({});
-
-const saveBuilding = () => {
-    if (!validateForm()) return;
-    
-    if (props.isEditing) {
-        console.log("editted")
-        buildingStore.updateBuilding(currentBuilding.value)
-    } else {
-        buildingStore.addBuilding(currentBuilding.value);
-    }
-    emit('close');
-};
-
-const validateForm = () => {
-    errors.value = {};
-
-    if (!currentBuilding.value.name.trim()) {
-        errors.value.name = 'Tên tòa nhà không được để trống';
-    }
-
-    if (!currentBuilding.value.address.trim()) {
-        errors.value.address = 'Địa chỉ không được để trống';
-    }
-
-    if (!currentBuilding.value.representative.trim()) {
-        errors.value.representative = 'Tên người đại diện không được để trống';
-    }
-
-    if (!currentBuilding.value.phone.trim()) {
-        errors.value.phone = 'Số điện thoại không được để trống';
-    } else if (!/^(0[3|5|7|8|9])+([0-9]{8})$/.test(currentBuilding.value.phone)) {
-        errors.value.phone = 'Số điện thoại không hợp lệ';
-    }
-
-    if (!currentBuilding.value.cccd.trim()) {
-        errors.value.cccd = 'Số CCCD không được để trống';
-    } else if (!/^\d{12}$/.test(currentBuilding.value.cccd)) {
-        errors.value.cccd = 'Số CCCD phải có 12 chữ số';
-    }
-
-    if (!currentBuilding.value.cccdDate) {
-        errors.value.cccdDate = 'Ngày cấp CCCD không được để trống';
-    } else if (new Date(currentBuilding.value.cccdDate) > new Date()) {
-        errors.value.cccdDate = 'Ngày cấp CCCD không được lớn hơn ngày hiện tại';
-    }
-
-    return Object.keys(errors.value).length === 0;
-};
-
-
-watch(() => props.visible, (newVisible) => {
-    console.log(newVisible)
-    if (newVisible) {
-        currentBuilding.value = {...props.currentBuilding};
-        buildingModal.show();
-    } else {
-        buildingModal.hide();
-    }
-})
-
-onMounted(() => {
-    if (process.client) {
-        import('bootstrap').then((bootstrap) => {
-            const modalElement = document.getElementById('buildingModal');
-            buildingModal = new bootstrap.Modal(modalElement);
-            
-            modalElement.addEventListener('shown.bs.modal', () => {
-                // Set focus to the first input or button inside the modal
-                modalElement.querySelector('input, button').focus();
-            });
-        });
-    }
-    document.getElementById('buildingModal').addEventListener('hidden.bs.modal', () => {
-        currentBuilding.value = {
-            id: null,
-            name: '',
-            address: '',
-            representative: '',
-            phone: '',
-            cccd: '',
-            cccdDate: ''
-        };
-        errors.value = {}; 
-        emit('close');
-    });
-})
-</script>
 
 <style scoped>
-/* Custom styles nếu cần */
 .modal-header {
 background-color: #f8f9fa;
 border-bottom: 1px solid #dee2e6;
