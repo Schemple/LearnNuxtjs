@@ -74,7 +74,7 @@ export const useBuildingStore = () => {
   const addBuilding = async (buildingData) => {
     loading.value = true
     error.value = null
-    
+    console.log(buildingData)
     try {
       const newBuilding = {
         ...buildingData,

@@ -1,6 +1,9 @@
 <!-- SCRIPT -->
 <script setup>
+import { useForm, useField } from 'vee-validate'
+import * as yup from 'yup'
 import { ref, onMounted } from 'vue'
+
 const emit = defineEmits(['close']);
 const props = defineProps({
     visible: {
@@ -19,79 +22,61 @@ const props = defineProps({
 const alert = useAlert();
 const buildingStore = useBuildingStore();
 let buildingModal = null;
-const currentBuilding = ref({
-    id: null,
-    name: '',
-    address: '',
-    representative: '',
-    phone: '',
-    cccd: '',
-    cccdDate: ''
+
+const schema = yup.object({
+  name: yup.string().required('Tên tòa nhà không được để trống'),
+  address: yup.string().required('Địa chỉ không được để trống'),
+  representative: yup.string().required('Tên người đại diện không được để trống'),
+  phone: yup
+    .string()
+    .required('Số điện thoại không được để trống')
+    .matches(/^(0[3|5|7|8|9])+([0-9]{8})$/, 'Số điện thoại không hợp lệ'),
+  cccd: yup
+    .string()
+    .required('Số CCCD không được để trống')
+    .matches(/^\d{12}$/, 'Số CCCD phải có 12 chữ số'),
+  cccdDate: yup
+    .date()
+    .typeError('Ngày cấp CCCD không hợp lệ')
+    .required('Ngày cấp CCCD không được để trống')
+    .max(new Date(), 'Ngày cấp CCCD không được lớn hơn ngày hiện tại'),
 });
 
-const errors = ref({});
+const { handleSubmit, errors, resetForm, setValues } = useForm({
+  validationSchema: schema,
+});
 
-const saveBuilding = async () => {
-    if (!validateForm()) return;
+const { value: name } = useField('name');
+const { value: address } = useField('address');
+const { value: representative } = useField('representative');
+const { value: phone } = useField('phone');
+const { value: cccd } = useField('cccd');
+const { value: cccdDate } = useField('cccdDate');
+
+
+const saveBuilding = handleSubmit(async (values) => {
     try {
         if (props.isEditing) {
-            await buildingStore.updateBuilding(currentBuilding.value)
-            alert.showSuccessAlert("Chỉnh sửa thông tin tòa nhà thành công")
+            await buildingStore.updateBuilding({id: props.currentBuilding.id, ...values});
+            alert.showSuccessAlert("Chỉnh sửa thông tin tòa nhà thành công");
         } else {
-            await buildingStore.addBuilding(currentBuilding.value);
-            alert.showSuccessAlert("Thêm mới tòa nhà thành công")
+            await buildingStore.addBuilding(values);
+            alert.showSuccessAlert("Thêm mới tòa nhà thành công");
         }
     } catch (err) {
-        if (props.isEditing) alert.showErrorAlert("Có lỗi xảy ra khi sửa thông tin tòa nhà")
-        else alert.showErrorAlert("Có lỗi xảy ra khi thêm thông tin tòa nhà");
+        alert.showErrorAlert("Có lỗi xảy ra khi lưu tòa nhà");
     } finally {
         emit('close');
     }
-};
-
-const validateForm = () => {
-    errors.value = {};
-
-    if (!currentBuilding.value.name.trim()) {
-        errors.value.name = 'Tên tòa nhà không được để trống';
-    }
-
-    if (!currentBuilding.value.address.trim()) {
-        errors.value.address = 'Địa chỉ không được để trống';
-    }
-
-    if (!currentBuilding.value.representative.trim()) {
-        errors.value.representative = 'Tên người đại diện không được để trống';
-    }
-
-    if (!currentBuilding.value.phone.trim()) {
-        errors.value.phone = 'Số điện thoại không được để trống';
-    } else if (!/^(0[3|5|7|8|9])+([0-9]{8})$/.test(currentBuilding.value.phone)) {
-        errors.value.phone = 'Số điện thoại không hợp lệ';
-    }
-
-    if (!currentBuilding.value.cccd.trim()) {
-        errors.value.cccd = 'Số CCCD không được để trống';
-    } else if (!/^\d{12}$/.test(currentBuilding.value.cccd)) {
-        errors.value.cccd = 'Số CCCD phải có 12 chữ số';
-    }
-
-    if (!currentBuilding.value.cccdDate) {
-        errors.value.cccdDate = 'Ngày cấp CCCD không được để trống';
-    } else if (new Date(currentBuilding.value.cccdDate) > new Date()) {
-        errors.value.cccdDate = 'Ngày cấp CCCD không được lớn hơn ngày hiện tại';
-    }
-
-    return Object.keys(errors.value).length === 0;
-};
-
+});
 
 watch(() => props.visible, (newVisible) => {
     if (newVisible) {
-        currentBuilding.value = {...props.currentBuilding};
+        setValues({ ...props.currentBuilding })
         buildingModal.show();
     } else {
         buildingModal.hide();
+        resetForm()
     }
 })
 
@@ -108,15 +93,7 @@ onMounted(() => {
         });
     }
     document.getElementById('buildingModal').addEventListener('hidden.bs.modal', () => {
-        currentBuilding.value = {
-            id: null,
-            name: '',
-            address: '',
-            representative: '',
-            phone: '',
-            cccd: '',
-            cccdDate: ''
-        };
+        resetForm()
         errors.value = {}; 
         emit('close');
     });
@@ -146,7 +123,7 @@ onMounted(() => {
                                 <input 
                                     type="text" 
                                     class="form-control"
-                                    v-model="currentBuilding.name"
+                                    v-model="name"
                                     :class="{ 'is-invalid': errors.name }"
                                     placeholder="Nhập tên tòa nhà"
                                     required
@@ -165,7 +142,7 @@ onMounted(() => {
                                 <input 
                                     type="text" 
                                     class="form-control"
-                                    v-model="currentBuilding.address"
+                                    v-model="address"
                                     :class="{ 'is-invalid': errors.address }"
                                     placeholder="Nhập địa chỉ tòa nhà"
                                     required
@@ -186,7 +163,7 @@ onMounted(() => {
                                 <input 
                                     type="text" 
                                     class="form-control"
-                                    v-model="currentBuilding.representative"
+                                    v-model="representative"
                                     :class="{ 'is-invalid': errors.representative }"
                                     placeholder="Nhập tên người đại diện"
                                     required
@@ -205,7 +182,7 @@ onMounted(() => {
                                 <input 
                                     type="tel" 
                                     class="form-control"
-                                    v-model="currentBuilding.phone"
+                                    v-model="phone"
                                     :class="{ 'is-invalid': errors.phone }"
                                     placeholder="Nhập số điện thoại"
                                     required
@@ -226,7 +203,7 @@ onMounted(() => {
                                 <input 
                                     type="text" 
                                     class="form-control"
-                                    v-model="currentBuilding.cccd"
+                                    v-model="cccd"
                                     :class="{ 'is-invalid': errors.cccd }"
                                     placeholder="Nhập số CCCD"
                                     maxlength="12"
@@ -246,7 +223,7 @@ onMounted(() => {
                                 <input 
                                     type="date" 
                                     class="form-control"
-                                    v-model="currentBuilding.cccdDate"
+                                    v-model="cccdDate"
                                     :class="{ 'is-invalid': errors.cccdDate }"
                                     :max="getCurrentDateString()"
                                     required
