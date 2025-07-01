@@ -57,13 +57,14 @@ const { value: cccdDate } = useField('cccdDate');
 const saveBuilding = handleSubmit(async (values) => {
     try {
         if (props.isEditing) {
-            await buildingStore.updateBuilding({id: props.currentBuilding.id, ...values});
+            await buildingStore.updateBuilding({ ...values, id: props.currentBuilding.id })
             alert.showSuccessAlert("Chỉnh sửa thông tin tòa nhà thành công");
         } else {
-            await buildingStore.addBuilding(values);
+            await buildingStore.createBuilding(values)
             alert.showSuccessAlert("Thêm mới tòa nhà thành công");
         }
     } catch (err) {
+        console.log(err)
         alert.showErrorAlert("Có lỗi xảy ra khi lưu tòa nhà");
     } finally {
         emit('close');
@@ -92,11 +93,11 @@ onMounted(() => {
             });
         });
     }
-    document.getElementById('buildingModal').addEventListener('hidden.bs.modal', () => {
-        resetForm()
-        errors.value = {}; 
-        emit('close');
-    });
+    // document.getElementById('buildingModal').addEventListener('hidden.bs.modal', () => {
+    //     resetForm()
+    //     errors.value = {}; 
+    //     emit('close');
+    // });
 })
 </script>
 <!-- HTML -->

@@ -39,12 +39,11 @@ export default defineNuxtConfig({
   },
 
   plugins: [
-    // '~/plugins/bootstrap.client.js',
     '~/plugins/sweetalert2.client.js'
   ],
   
   modules: [
-    // '@pinia/nuxt',
+    '@pinia/nuxt',
   ],
   
   build: {

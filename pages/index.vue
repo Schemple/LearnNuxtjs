@@ -1,40 +1,13 @@
 <template>
 <div class="container">
-    <!-- Search and Add Button -->
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <div class="input-group">
-                <span class="input-group-text">
-                    <i class="fas fa-search"></i>
-                </span>
-                <input 
-                    type="text" 
-                    class="form-control" 
-                    placeholder="Tìm kiếm theo tên tòa nhà, địa chỉ hoặc người đại diện..."
-                    v-model="searchQuery"
-                    @input="handleSearch"
-                >
-            </div>
-        </div>
-        <div class="col-md-4">
-            <button 
-                class="btn btn-success w-100"
-                @click="openAddModal"
-            >
-                <i class="fas fa-plus me-2"></i>
-                Thêm tòa nhà mới
-            </button>
-        </div>
-    </div>
-
     <!-- Statistics Cards -->
-    <div class="row mb-4">
+    <div class="row mb-4 align-items-center justify-content-end">
         <div class="col-md-4">
             <div class="card text-white bg-info">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h4 class="card-title">{{ buildings.length }}</h4>
+                            <h4 class="card-title">{{ buildingStore.totalBuildings }}</h4>
                             <p class="card-text">Tổng số tòa nhà</p>
                         </div>
                         <div class="align-self-center">
@@ -44,21 +17,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card text-white bg-warning">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 class="card-title">{{ filteredBuildings.length }}</h4>
-                            <p class="card-text">Kết quả tìm kiếm</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-search fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+
         <div class="col-md-4">
             <div class="card text-white bg-success">
                 <div class="card-body">
@@ -76,8 +35,21 @@
         </div>
     </div>
 
-    <BuildingTable 
-    :filteredBuildings="filteredBuildings" 
+    <!-- Search Button -->
+    <div class="row mb-4 justify-content-end">
+      <div class="col-md-2">
+          <button 
+              class="btn btn-success w-100 align-right"
+              @click="openAddModal"
+          >
+              <i class="fas fa-plus me-2"></i>
+              Thêm tòa nhà mới
+          </button>
+      </div>
+    </div>
+
+    <BuildingDataTable
+    :buildings="buildingStore.buildings"
     @edit="openEditModal"
     @delete="deleteBuilding"
     />
@@ -92,11 +64,11 @@
 </template>
 
 <script setup lang="ts">
+  import { onMounted } from 'vue';
+  // const { start, finish } = useLoadingIndicator();
   // Reactive data
   const alert = useAlert();
   const buildingStore = useBuildingStore();
-  const buildings = buildingStore.buildings;
-  const searchQuery = ref('');
   const currentBuilding = ref({
       id: null,
       name: '',
@@ -112,31 +84,8 @@
   // Modal instances
   let buildingModalVisible = ref(false);
 
-  // Computed
-  const filteredBuildings = computed(() => {
-      if (!searchQuery.value) return buildings.value;
-      
-      const query = searchQuery.value.toLowerCase();
-      return buildings.value.filter(building => 
-          building.name.toLowerCase().includes(query) ||
-          building.address.toLowerCase().includes(query) ||
-          building.representative.toLowerCase().includes(query) ||
-          building.phone.includes(query) ||
-          building.cccd.includes(query)
-      );
-  });
-
   // Methods
   const openAddModal = () => {
-    // currentBuilding.value = {
-    //   id: null,
-    //   name: '',
-    //   address: '',
-    //   representative: '',
-    //   phone: '',
-    //   cccd: '',
-    //   cccdDate: ''
-    // };
     isEditing.value = false;
     buildingModalVisible.value = true;
   };
@@ -171,10 +120,6 @@
       cccdDate: ''
     };
     buildingModalVisible.value = false;
-  };
-
-  const handleSearch = () => {
-    //
   };
 
 </script>
