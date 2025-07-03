@@ -1,31 +1,19 @@
-<!-- components/Layout/AppHeader.vue -->
+<!-- components/app/Header.vue -->
 <script setup>
 </script>
 
 <template>
-<nav class="navbar navbar-expand-lg navbar-dark bg-black mb-4">
-    <div class="container">
-        <a class="navbar-brand" href="#">
-            <i class="fas fa-building me-2"></i>
-            Quản lý Tòa nhà Hà Nội
+  <nav class="bg-black text-white mb-6">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between py-4">
+        <a href="/" class="flex items-center text-white text-lg font-semibold hover:text-gray-200 transition-colors duration-200">
+          <i class="fas fa-building mr-2"></i>
+          Quản lý Tòa nhà Hà Nội
         </a>
+        <button class="md:hidden text-white hover:text-gray-200">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+      </div>
     </div>
-</nav>
+  </nav>
 </template>
-
-<style lang="scss" scoped>
-.header-actions {
-    margin-top: 1rem;
-}
-
-@media (max-width: 768px) {
-    .header-actions {
-        margin-top: 1rem;
-        text-align: center !important;
-    }
-
-    .btn {
-        margin: 0.25rem;
-    }
-}
-</style>

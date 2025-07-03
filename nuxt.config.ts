@@ -1,4 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import Aura from '@primeuix/themes/aura';
+import tailwindcss from "@tailwindcss/vite";
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: false },
@@ -6,7 +9,6 @@ export default defineNuxtConfig({
 
   css: [
     '~/assets/css/main.css',
-    '~/assets/css/bootstrap.css'
   ],
   
   app: {
@@ -18,34 +20,33 @@ export default defineNuxtConfig({
         { name: 'description', content: 'Hệ thống quản lý thông tin các tòa nhà trên địa bàn Thành phố Hà Nội' },
         { name: 'keywords', content: 'quản lý tòa nhà, Hà Nội, building management' }
       ],
-      // link: [
-      //   { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-      //   {
-      //     rel: 'stylesheet',
-      //     href: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-      //     integrity: 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=',
-      //     crossorigin: ''
-      //   }
-      // ],
-      // script: [
-      //   {
-      //     src: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-      //     integrity: 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=',
-      //     crossorigin: '',
-      //     body: true // Load script in the body
-      //   }
-      // ]
     }
   },
 
   plugins: [
     '~/plugins/sweetalert2.client.js'
   ],
+
+  vite: {
+    plugins: [
+      tailwindcss(),
+    ],
+  },
   
   modules: [
     '@pinia/nuxt',
+    '@primevue/nuxt-module',
+    '@nuxtjs/leaflet'
   ],
-  
+
+  primevue: {
+    options: {
+      theme: {
+        preset: Aura
+      }
+    }
+  },
+
   build: {
     
   },
@@ -53,7 +54,9 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       appName: 'Quản lý Tòa nhà - Thành phố Hà Nội',
-      appVersion: '1.0.0'
+      appVersion: '1.0.0',
+      // apiBase: 'https://6865f1a489803950dbb0b106.mockapi.io/api/'
+      apiBase: 'http://localhost:3000/api/'
     }
   }
 })
