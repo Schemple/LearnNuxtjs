@@ -57,18 +57,16 @@ let buildings = [
     },
 ];
 
-export default defineEventHandler(async (event) => {
-    const id = parseInt(event.context.params.id);
-    const index = buildings.findIndex(building => building.id === id);
-    try {
-        if (index !== -1) {
-            buildings.splice(index, 1);
-            return { message: 'Deleted' };
-        }
-    } catch (error) {
-        setResponseStatus(event, 500);
-        return { message: 'Internal server error' };
-    } 
-    setResponseStatus(event, 404);
-    return { message: 'Building not found' };
+export default defineEventHandler((event) => {
+    const id = parseInt(event.context.params.id, 10);
+    const building = buildings.find(b => b.id === id);
+
+    if (!building) {
+        throw createError({
+            statusCode: 404,
+            statusMessage: 'Building not found',
+        });
+    }
+
+    return building;
 });

@@ -48,11 +48,11 @@
     <div class="w-full md:w-auto">
       <Button label="Thêm tòa nhà mới" @click="openAddModal"/>
       <Dialog 
-          v-model:visible="overlayVisible" 
-          maximizable
-          modal
-          :header="title"
-          :style="{ width: '50rem' }"
+        v-model:visible="overlayVisible" 
+        maximizable
+        modal
+        :header="title"
+        :style="{ width: '50rem' }"
       >
           <span class="text-gray-500 dark:text-gray-400 block mb-8">
               Nhập thông tin tòa nhà
@@ -169,7 +169,7 @@
 
   <!-- Data Table -->
   <!-- <BuildingDataTable
-    :buildings="buildingStore.buildings"
+    :buildings="buildings"
     @edit="openEditModal"
     @delete="deleteBuilding"
   /> -->
@@ -224,74 +224,15 @@
       >
         <LPopup>
           <div class="popup-content">
-            <h4>{{ building.name }}</h4>
+            <h4><strong>{{ building.name }}</strong></h4>
             <p>{{ building.address }}</p>
-            <Button 
-              label="Xem chi tiết" 
-              size="small" 
-              @click="openInfoModal(building)"
-            />
+            <p>Kinh độ: {{ formatDMS(building.longtitude) }}</p>
+            <p>Vĩ độ: {{ formatDMS(building.latitude) }}</p>
           </div>
         </LPopup>
       </LMarker>
     </LMap>
   </div>
-  <Dialog
-    v-model:visible="infoDialogVisible"
-    modal
-    header="Thông tin tòa nhà"
-  >
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-            Tên tòa nhà
-        </label>
-        <InputText 
-            v-model="name" 
-            class="flex-auto" 
-            autocomplete="off" 
-            :style="{ width: '100%' }"
-            disabled
-        />
-      </div>
-      <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-            Địa chỉ
-        </label>
-        <InputText 
-            v-model="address" 
-            class="flex-auto" 
-            autocomplete="off" 
-            :style="{ width: '100%' }"
-            disabled
-        />
-      </div>
-      <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-            Kinh độ
-        </label>
-        <InputText 
-            v-model="longtitude" 
-            class="flex-auto" 
-            autocomplete="off" 
-            :style="{ width: '100%' }"
-            disabled
-        />
-      </div>
-      <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-            Vĩ độ
-        </label>
-        <InputText 
-            v-model="latitude" 
-            class="flex-auto" 
-            autocomplete="off" 
-            :style="{ width: '100%' }"
-            disabled
-        />
-      </div>
-    </div>
-  </Dialog>   
 </div>
 </template>
 
@@ -314,16 +255,15 @@
 
   const config = useRuntimeConfig();
   const apiBase = config.public.apiBase ;
-  const buildings = ref<Building[]>([]);
-  const buildingCount = ref(null);
   const alert = useAlert();
-  const search = ref("");
-
-  const map = ref(null)
   
-  const overlayVisible = ref(false);
-  const infoDialogVisible = ref(false)
+  const { data: buildings, pending, error } = await useFetch<Building[]>(apiBase + 'building', {
+    default: () => [],
+  });
+  const buildingCount = ref(buildings.value?.length || 0);
 
+  const search = ref("");
+  const overlayVisible = ref(false);
   const isEditing = ref(false);
   const buttonTitle = ref("Thêm mới")
   const title = ref('Thêm mới tòa nhà')
@@ -438,14 +378,6 @@
     }
   });
 
-  const openInfoModal = (building: Building) => {
-    name.value = building.name || ''
-    address.value = building.address || ''
-    longtitude.value = building.longtitude || ''
-    latitude.value = building.latitude || ''
-    infoDialogVisible.value = !infoDialogVisible.value;
-  }
-
   const handleSearch = async () => {
     buildings.value = await fetchBuilding();
     if (!search.value) {
@@ -465,7 +397,8 @@
     });
   }
 
-  function formatDate(timestamp) {
+  function formatDate(timestamp: number | string) {
+      if (!timestamp) return '';
       const date = new Date(timestamp);
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -473,13 +406,17 @@
       return `${month}-${day}-${year}`;
   }
 
-  function getCurrentDateString() {
-    return new Date().toISOString().split('T')[0];
-  };
-
   function getCurrentDate() {
     return new Date().toLocaleDateString('vi-VN');
   };
+
+  function formatDMS(degree) {
+    const absDegree = Math.abs(degree);
+    const d = Math.floor(absDegree);
+    const m = Math.floor((absDegree - d) * 60);
+    const s = ((absDegree - d - m / 60) * 3600).toFixed(2);
+    return `${d}° ${m}' ${s}"`;
+  }
 
   const fetchBuilding = async () => {
     try {
@@ -490,17 +427,6 @@
       return [];
     }
   }
-  onMounted(async () => {
-    try {
-      const data = await fetchBuilding()
-      buildings.value = data || [];
-      console.log(data);
-      buildingCount.value = buildings.value.length;
-    } catch (err) {
-      console.error(err);
-      alert.showErrorAlert("Có lỗi xảy ra khi tải dữ liệu tòa nhà");
-    }
-  });
 </script>
 
 <style lang="scss" scoped>
