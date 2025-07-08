@@ -1,0 +1,5 @@
+button.p-button {
+  border-radius: 0.25rem;
+  background-color: #4f46e5; /* Indigo-600 */
+  color: white;
+}

@@ -4,7 +4,7 @@ import { defineStore } from 'pinia'
 export const useBuildingStore = defineStore('building', () => {
   const buildings = ref([])
 
-  const fetchBuilding = async (search = null) => {
+  const fetchBuilding = async () => {
     try {
       const { data } = await useFetch('/api/buildings', {
         method: 'GET',

@@ -9,6 +9,8 @@ export default defineNuxtConfig({
 
   css: [
     '~/assets/css/main.css',
+    '~/assets/tailwind.css',
+    '~/assets/styles.scss'
   ],
   
   app: {
@@ -23,10 +25,6 @@ export default defineNuxtConfig({
     }
   },
 
-  plugins: [
-    '~/plugins/sweetalert2.client.js'
-  ],
-
   vite: {
     plugins: [
       tailwindcss(),
@@ -40,9 +38,11 @@ export default defineNuxtConfig({
   ],
 
   primevue: {
+    // usePrimeVue: false,
     options: {
       theme: {
-        preset: Aura
+        preset: Aura,
+
       }
     }
   },
@@ -55,7 +55,6 @@ export default defineNuxtConfig({
     public: {
       appName: 'Quản lý Tòa nhà - Thành phố Hà Nội',
       appVersion: '1.0.0',
-      // apiBase: 'https://6865f1a489803950dbb0b106.mockapi.io/api/'
       apiBase: 'http://localhost:3000/api/'
     }
   }
