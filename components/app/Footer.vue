@@ -5,7 +5,7 @@ const config = useRuntimeConfig()
 </script>
 
 <template>
-  <footer class="bg-gray-100 py-8 mt-12 border-t border-gray-200">
+  <footer class="layout-footer">
     <div class="container mx-auto px-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Left Column -->

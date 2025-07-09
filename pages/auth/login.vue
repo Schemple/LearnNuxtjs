@@ -1,11 +1,42 @@
 <script setup>
 import { ref } from 'vue';
+import { useForm, useField } from 'vee-validate'
+import * as yup from 'yup'
 
-const email = ref('');
-const password = ref('');
+const authStore = useAuthStore();
+const alert = useAlert();
+
+const schema = yup.object({
+    email: yup.string().email('Email không hợp lệ').required('Email là bắt buộc').max(255, 'Email không được vượt quá 255 ký tự'),
+    password: yup.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự').required('Mật khẩu là bắt buộc'),
+});
+
+const { handleSubmit, errors, resetForm, setValues } = useForm({
+    validationSchema: schema,
+});
+const { value: email } = useField('email');
+const { value: password } = useField('password')
+
+const signIn = handleSubmit(async (values) => {
+    try {
+        await authStore.login(values.email, values.password);
+        resetForm();
+        setValues({ email: '', password: '' });
+        alert.showSuccessAlert('Chuyển hướng bạn tới trang chính...', 'Đăng nhập thành công!');
+        return navigateTo('/');
+    } catch (error) {
+        alert.showErrorAlert(error.message || 'Vui lòng thử lại sau.', 'Đăng nhập thất bại!');
+    }
+});
+
 const checked = ref(false);
 definePageMeta({
     layout: 'auth',
+    title: 'Đăng nhập',
+    meta: [
+        { name: 'description', content: 'Đăng nhập vào hệ thống quản lý Tòa nhà Thành phố Hà Nội' },
+        { name: 'keywords', content: 'đăng nhập, quản lý tòa nhà, hệ thống, thành phố Hà Nội' },
+    ],
 });
 </script>
 
@@ -21,10 +52,39 @@ definePageMeta({
 
                     <div>
                         <label for="email1" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Email</label>
-                        <InputText id="email1" type="text" placeholder="Địa chỉ Email" class="w-full md:w-[30rem] mb-8" v-model="email" />
-
+                        <InputText 
+                            id="email1" 
+                            type="text" 
+                            placeholder="Địa chỉ Email" 
+                            class="w-full  mb-2" 
+                            v-model="email" 
+                            :invalid="errors.email? true : false" 
+                        />
+                        <Message 
+                            v-if="errors.email" 
+                            severity="error" 
+                            size="small" 
+                            class="mb-4" 
+                            variant="simple"
+                        >{{ errors?.email }}</Message>
                         <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Password</label>
-                        <Password id="password1" v-model="password" placeholder="Mật khẩu" :toggleMask="true" class="mb-4" fluid :feedback="false"></Password>
+                        <Password 
+                            id="password1" 
+                            v-model="password" 
+                            placeholder="Mật khẩu" 
+                            :toggleMask="true" 
+                            class="mb-2" 
+                            fluid 
+                            :feedback="false
+                        ">
+                        </Password>
+                        <Message 
+                            v-if="errors?.password" 
+                            severity="error"
+                            size="small" 
+                            class="mb-4" 
+                            variant="simple"
+                        >{{ errors.password }}</Message>
 
                         <div class="flex items-center justify-between mt-2 mb-8 gap-8">
                             <div class="flex items-center">
@@ -33,7 +93,7 @@ definePageMeta({
                             </div>
                             <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
                         </div>
-                        <Button label="Sign In" class="w-full" as="router-link" to="/"></Button>
+                        <Button label="Đăng nhập" class="w-full" @click="signIn"></Button>
                     </div>
                 </div>
             </div>

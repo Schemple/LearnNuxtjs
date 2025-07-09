@@ -8,8 +8,7 @@ export default defineNuxtConfig({
   ssr: false,
 
   css: [
-    '~/assets/css/main.css',
-    '~/assets/tailwind.css',
+    '~/assets/styles.css',
     '~/assets/styles.scss'
   ],
   
@@ -42,7 +41,9 @@ export default defineNuxtConfig({
     options: {
       theme: {
         preset: Aura,
-
+        options: {
+          darkModeSelector: '.app-dark'
+        }
       }
     }
   },

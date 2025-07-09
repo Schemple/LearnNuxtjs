@@ -1,7 +1,7 @@
 // tailwind.config.js
-
+import PrimeUI from 'tailwindcss-primeui';
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
@@ -9,7 +9,5 @@ module.exports = {
   theme: {
     extend: {},
   },
-  plugins: [
-    require('tailwindcss-primeui'), 
-  ],
+  // plugins: [PrimeUI],
 }
